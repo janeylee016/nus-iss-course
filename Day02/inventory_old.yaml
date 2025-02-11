@@ -1,0 +1,16 @@
+Vault password: 
+all:
+  vars:
+    ansible_user: root
+    ansible_connection: ssh
+    ansible_ssh_private_key: "home/fred/.ssh/workshop01"
+  hosts:
+    mydroplet:
+      ansible_host: 68.183.232.131
+      pkgs_to_install:
+      - name: ngin
+        to_install: present
+      - name: zip
+        to_install: present
+
+#ansible-vault encrypt inventory.yaml

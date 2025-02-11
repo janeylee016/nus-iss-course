@@ -1,0 +1,10 @@
+all:
+  vars:
+    ansible_user: root
+    ansible_connection: ssh
+    ansible_ssh_private_key: "home/fred/.ssh/workshop01" 
+  hosts:
+      droplet-ws-02:
+        ansible_host: 206.189.43.148
+        code_server_password: mypassword
+        code_server_domain: code-${droplet_id}.nip.io

@@ -1,0 +1,90 @@
+- name: Setup my server
+  hosts: all
+  vars:
+    pkgs_to_install:
+      nginx: present
+    nginx_root_dir: "/etc/nginx/sites-available/code-server.conf"
+  tasks:
+  - name: check if file exists
+    stat:
+      path: /usr/local/opt/code-server
+    register: f
+  - name: Display the output of stat
+    debug:
+      msg: "File exists? {{ f.stat.exists }}"
+  - name: create Directory on remote server
+    file:
+      path: /usr/local/opt/code-server
+      state: directory
+      owner: root
+      mode: "0755"
+  - name: Upload file
+    copy:
+      src: code-server-4.96.4-linux-amd64.tar.gz
+      dest: /usr/local/opt/code-server
+    when: not f.stat.exists
+  - name: Unpack the file
+    unarchive:
+      src: /usr/local/opt/code-server/code-server-4.96.4-linux-amd64.tar.gz
+      dest: /usr/local/opt/code-server
+      remote_src: yes
+      list_files: yes
+    register: f1
+  - name: Symlink the file to the code-server binary
+    file:
+      src: /usr/local/opt/code-server/code-server-4.96.4-linux-amd64/bin/code-server
+      dest: /usr/lib/code-server
+      state: link
+  - name: Symlink another file
+    file:
+      src: /usr/local/opt/code-server/code-server-4.96.4-linux-amd64/bin/code-server
+      dest: /usr/bin/code-server
+      state: link
+  - name: Create directory
+    file:
+      path: /var/lib/code-server
+      state: directory
+      owner: root
+      mode: "0755"
+  - name: Create a service file from a template
+    template:
+      src: code-server.service.j2
+      dest: /lib/systemd/system/code-server.service
+      owner: root
+      mode: "6044"
+  - name: Start code-server service
+    systemd:
+      daemon_reload: true
+      name: code-server
+      enabled: true
+      state: restarted
+  - name: Install nginx
+    apt:
+      update_cache: yes
+      name: "{{ item.key }}"
+      state: "{{ item.value }}"
+    loop: "{{ pkgs_to_install | dict2items }}"
+  - name: Create nginx configuration from a template #copy the file from template to remove server
+    template:
+      src: code-server.conf.j2
+      dest: /etc/nginx/sites-available/default
+      owner: root
+      mode: "6044"
+  - name: Create symbolic link to conf file
+    file:
+      src: /etc/nginx/sites-available/default
+      dest: /etc/nginx/sites-enabled/code-server.conf
+      state: link
+  - name: Start nginx
+    systemd:
+      daemon_reload: true
+      name: nginx
+      enabled: true
+      # important for the state to be restarted
+      state: restarted
+
+
+
+
+      
+

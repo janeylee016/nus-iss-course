@@ -1,0 +1,4 @@
+{% for p in pkgs_to_install %}
+    Name: {{ p.name }}
+    Status: {{ p.to_install }}
+{% endfor %}

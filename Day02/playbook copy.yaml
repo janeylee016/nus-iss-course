@@ -1,0 +1,58 @@
+# - name: Test connectivity
+#   # apply this play on all host in the inventory
+#   hosts: all
+#   tasks:
+#     - name: Ping the host
+#       ping:
+#     - name: Echo a message
+#       debug:
+#         msg: "user running this task {{ ansible_user }}, IP address is {{ ansible_host }}"
+#     - name: Time and date on the server
+#       shell:
+#         cmd: echo "The current time/date is $(date)"
+
+#Day 2
+- name: Setup my server
+  hosts: all
+  vars:
+    # assets: https://drive.google.com/file/d/12IsLzXXGrYc3N8N9GkmrIt3w8TPK2e9m/edit
+    # pkgs_to_install: #method 1
+    # - name: nginx
+    #   to_install: present
+    # - name: zip
+    #   to_install: present
+    install_these:
+      ngix: present
+      zip: present
+  tasks:
+    - name: Install nginx
+      apt: 
+        update_cache: yes
+        name: "{{ item.name }}"
+        state: "{{ item.to_install }}"
+      # apt: #method 3
+      #   update_cache: yes
+      #   name: "{{ item.name }}"
+      #   state: present 
+      loop: #method 2
+      - name: nginx
+        to_install: present
+      - name: zip
+        to_install: present
+      loop: #method 3
+      - nginx
+      - zip
+      # loop: "{{ pkgs_to_install }}" # method 1
+    - name: Add HTML content to /var/www/html
+      unarchive:
+        src: assets.zip
+        dest: /var/www/html
+    - name: Start nginx
+      systemd: # no service called systemd_service
+        daemon_reload: true
+        name: nginx
+        enabled: true
+        state: started
+    
+
+
