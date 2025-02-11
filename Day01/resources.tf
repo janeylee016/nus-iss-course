@@ -101,3 +101,5 @@ output "droplet-day01-ipv4" {
 # after tainting it and want to keep it, can untaint
 
 # terraform import -> to add items that existed but not in the state 
+
+# ssh -i ~/.ssh/workshop01 root@188.166.230.7 /206.189.158.127
